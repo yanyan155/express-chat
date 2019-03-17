@@ -1,15 +1,25 @@
 {
-  "name": "chat",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "name": "myapp",
+  "version": "0.0.0",
+  "private": true,
   "scripts": {
-    "exp" :"DEBUG=myapp:* npm start",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node ./bin/www"
   },
-  "author": "Yanis MAchkin",
-  "license": "ISC",
   "dependencies": {
-    "express": "^4.16.4"
+    "bson": "^4.0.2",
+    "cookie-parser": "~1.4.3",
+    "debug": "~2.6.9",
+    "ejs": "~2.5.7",
+    "express": "~4.16.0",
+    "http-errors": "~1.6.2",
+    "kerberos": "^1.1.2",
+    "mongodb": "^3.1.13",
+    "morgan": "^1.9.1",
+    "nconf": "^0.10.0",
+    "winston": "^3.2.1"
+  },
+  "engines": {
+    "node": "8.9.3",
+    "npm": "6.4.1"
   }
 }
