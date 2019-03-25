@@ -1,44 +1,50 @@
-const MongoClient = require('mongodb').MongoClient;
+const mongoose = require('./libs/mongoose');
 
-// Connection URL
-const url = 'mongodb://localhost:27017';
-// Database Name
-const dbName = 'test';
-// Use connect method to connect to the server
-MongoClient.connect(url, { useNewUrlParser: true }, function(err, client) {
-  if(err){
-    throw err;
+async function testDb() {
+  await dropDb();
+  let User = await createIndexes();
+  let save = await saveUsers(User);
+  closeConnection();
+}
 
-  } else {
-    const db = client.db(dbName);
-    const collection = db.collection('documents');
-    // Insert some documents
-    /*collection.insertMany([
-      {a : 1}, {a : 2}, {a : 3}
-    ], function(err, result) {
-      if(err){
-        throw err;
-      } else {
-        console.log(`${result.insertedCount}`);
-      }
-    });*/
+async function saveUsers (User) {
 
-    collection.find({}).toArray(function(err, docs) {
-      if(err){
-        throw err;
-      } else {
-        console.log(docs);
-      }
-    });
-    /*async function getCount() {
-      let count = await collection.countDocuments({});
-      console.log(count);
-    }
-    getCount();*/
-    collection.countDocuments({}, (err, result) => {
-      if(err) throw err;
-      console.log(result);
+  let user1 = new User ({name: 'tonki', password: 'tonki'});
+  let user2 = new User ({name: 'tonki', password: 'tolsty'});
+  let user3 = new User ({name: 'admin', password: 'admin'});
+
+  await Promise.all([saveUser(user1), saveUser(user2), saveUser(user3)]);
+}
+function saveUser(user) {
+
+  return new Promise(function(resolve, reject) {
+
+    user.save((err, product) => {
+      if (err) {
+        reject(err);
+        closeConnection();
+      }else if(product) {
+        console.log(product);
+        resolve(product);
+      };
     })
-  }
-  client.close();
+  });
+}
+
+function closeConnection () {
+  mongoose.connection.close();
+}
+
+mongoose.connection.on('open', () => {
+  testDb();
 });
+
+function dropDb () {
+  mongoose.connection.db.dropDatabase();
+}
+
+function createIndexes () {
+  const User = require('./models/user'); // if we reqiure early dropDb delete all indexes
+  User.ensureIndexes();
+  return User;
+}

@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
-    "mongo": "node createDB.js"
+    "mongo": "node createDB.js",
+    "goose": "node ./libs/mongoose.js"
   },
   "dependencies": {
     "bson": "^4.0.2",
@@ -16,6 +17,7 @@
     "kerberos": "^1.1.2",
     "mongodb": "^3.1.13",
     "mongodb-core": "~1.0",
+    "mongoose": "^5.4.19",
     "morgan": "^1.9.1",
     "nconf": "^0.10.0",
     "node-gyp": "^3.8.0",
