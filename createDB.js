@@ -35,10 +35,6 @@ function closeConnection () {
   mongoose.connection.close();
 }
 
-mongoose.connection.on('open', () => {
-  testDb();
-});
-
 function dropDb () {
   mongoose.connection.db.dropDatabase();
 }
@@ -48,3 +44,7 @@ function createIndexes () {
   User.ensureIndexes();
   return User;
 }
+
+mongoose.connection.on('open', () => {
+  testDb();
+});

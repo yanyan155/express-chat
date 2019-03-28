@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
+    "debug": "node --inspect ./bin/www",
     "start": "node ./bin/www",
     "mongo": "node createDB.js",
     "goose": "node ./libs/mongoose.js"
@@ -21,6 +22,7 @@
     "morgan": "^1.9.1",
     "nconf": "^0.10.0",
     "node-gyp": "^3.8.0",
+    "util": "^0.11.1",
     "winston": "^3.2.1"
   },
   "engines": {
