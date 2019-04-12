@@ -9,13 +9,13 @@ router.get('/:id', function(req, res, next) {
   try {
     let id = new ObjectID(req.params.id);
   } catch(err) {
-    next(404);
+    return next(404);
   }
   User.findById(req.params.id, function (err, user) {
     if(err) {
-      next(err)
+      next(err);
     }else if(!user) {
-      next(new HttpError(404, 'user not found'))
+      next(new HttpError(404, 'user not found'));
     }else {
       res.send(user);
     }

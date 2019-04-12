@@ -5,7 +5,15 @@ const cookieParser = require('cookie-parser');
 const morgan = require('morgan');
 const logger = require('./libs/logger');
 const HttpError = require('./error/index');
+const session = require('express-session');
+const config = require('./config/index');
+const MongoStore = require('connect-mongo')(session);
+const mongoose = require('./libs/mongoose');
+
 const indexRouter = require('./routes/index');
+const loginRouter = require('./routes/login');
+const logoutRouter = require('./routes/logout');
+const chatRouter = require('./routes/chat');
 const usersRouter = require('./routes/users');
 const userRouter = require('./routes/user');
 
@@ -13,35 +21,50 @@ let app = express();
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
-//app.engine('ejs', require('ejs-locals').__express);
 
 app.use(morgan('dev', {
     skip: (req, res) => { res.statusCode < 400}, 
     stream: process.stderr
 }));
-
 app.use(morgan('dev', {
     skip: (req, res) => { res.statusCode >= 400}, 
     stream: process.stdout
 }));
 
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use(session({
+  /*genid: function(req) {
+    return genuuid() // use UUIDs for session IDs, uid-safe library
+  },*/
+  secret: config.get('session:secret'),
+  key: config.get('session:key'),
+  resave: false,
+  saveUninitialized: false,
+  store: new MongoStore({ mongooseConnection: mongoose.connection })
+}));
+/*app.use((req, res, next) => {
+  req.session.visit = req.session.visit + 1 || 1;
+  res.send(`visits ${req.session.visit}`);
+});*/
 app.use(require('./middleware/sendHttpError'));
+app.use(require('./middleware/variables'));
+
 app.use('/', indexRouter);
+app.use('/login', loginRouter);
+app.use('/logout', logoutRouter);
+app.use('/chat', chatRouter);
 app.use('/users', usersRouter);
 app.use('/user', userRouter);
 
-// catch 404 and forward to error handler
 app.use(function(req, res, next) {
   logger.error('404 page requested');
   next(createError(404));
 });
 
-// error handler
 app.use(function(err, req, res, next) {
   if(typeof err === 'number') {
     err = new HttpError(err);

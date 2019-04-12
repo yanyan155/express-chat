@@ -5,8 +5,16 @@
     <link rel='stylesheet' href='/stylesheets/style.css' />
   </head>
   <body>
-    <h1><%= title %></h1>
-    <p><%= description %></p>
-    <%- include('template'); %>
+    <div class="container">
+      <%- include('navigation'); %>
+      <div class="main">
+        <h1><%= title %></h1>
+        <p><%= description %></p>
+        <% if(showAutorization) { %>
+          <%- include('autorization'); %>
+        <% } %>
+      </div>
+    </div>
+    <script src="/javascripts/scripts.js"></script>
   </body>
 </html>
