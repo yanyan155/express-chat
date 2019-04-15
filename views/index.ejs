@@ -13,6 +13,9 @@
         <% if(showAutorization) { %>
           <%- include('autorization'); %>
         <% } %>
+        <% if(webSocket) { %>
+          <%- include('webSocket'); %>
+        <% } %>
       </div>
     </div>
     <script src="/javascripts/scripts.js"></script>

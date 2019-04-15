@@ -3,6 +3,7 @@ const User = require('../models/user');
 module.exports = function(req, res, next) {
 
   res.locals.showAutorization = false;
+  res.locals.webSocket = false;
   req.user = res.locals.user = null;
 
   if(!req.session.userId) {
