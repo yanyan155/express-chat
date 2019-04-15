@@ -82,15 +82,53 @@ app.use(function(err, req, res, next) {
   }
 });
 
+function noop() {}
+function heartbeat() {
+  this.isAlive = true;
+}
+
 const WebSocket = require('ws');
- 
-const wss = new WebSocket.Server({ port: 8080 });
+
+const wss = new WebSocket.Server({ 
+  port: 8080,
+  host: 'localhost'
+});
 
 wss.on('connection', function connection(ws) {
+
+  ws.isAlive = true;
+  ws.on('pong', heartbeat);
+
   ws.on('message', function incoming(message) {
-    ws.send(message);
+    ws.send(message, (error) => {
+      if(error) {
+        logger.error(`status: ${error.status}, message: ${error.message}, additional: failed ws.send`);
+      }
+    });
   });
 });
+
+/*const interval = setInterval(function ping() {
+  wss.clients.forEach(function each(ws) {
+    if (ws.isAlive === false) return ws.terminate();
+ 
+    ws.isAlive = false;
+    ws.ping(noop);
+  });
+}, 30000);*/
+
+
+const interval = setTimeout(function ping() {
+
+  wss.clients.forEach(function each(ws) {
+    if (ws.isAlive === false) return ws.terminate();
+ 
+    ws.isAlive = false;
+    ws.ping(noop);
+  });
+
+  timerId = setTimeout(ping, 10000);
+}, 10000);
 
 // Broadcast to all.
 /*wss.broadcast = function broadcast(data) {
