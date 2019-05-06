@@ -77,3 +77,6 @@ fieldset {
 .log-out {
   cursor: pointer;
 }
+.messages-wrap i {
+  font-style: italic;
+}

@@ -16,6 +16,7 @@ const logoutRouter = require('./routes/logout');
 const chatRouter = require('./routes/chat');
 const usersRouter = require('./routes/users');
 const userRouter = require('./routes/user');
+const socket = require('./socket');
 
 let app = express();
 
@@ -36,6 +37,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+const sessionStore = require('./libs/sessionStore');
 app.use(session({
   /*genid: function(req) {
     return genuuid() // use UUIDs for session IDs, uid-safe library
@@ -44,7 +46,7 @@ app.use(session({
   key: config.get('session:key'),
   resave: false,
   saveUninitialized: false,
-  store: new MongoStore({ mongooseConnection: mongoose.connection })
+  store: sessionStore
 }));
 /*app.use((req, res, next) => {
   req.session.visit = req.session.visit + 1 || 1;
@@ -82,72 +84,11 @@ app.use(function(err, req, res, next) {
   }
 });
 
-function noop() {}
-function heartbeat() {
-  this.isAlive = true;
-}
-
-const WebSocket = require('ws');
-
-const wss = new WebSocket.Server({ 
-  port: 8080,
-  host: 'localhost'
-});
-
-wss.on('connection', function connection(ws) {
-
-  ws.isAlive = true;
-  ws.on('pong', heartbeat);
-
-  ws.on('message', function incoming(message) {
-    ws.send(message, (error) => {
-      if(error) {
-        logger.error(`status: ${error.status}, message: ${error.message}, additional: failed ws.send`);
-      }
-    });
-  });
-});
-
-/*const interval = setInterval(function ping() {
-  wss.clients.forEach(function each(ws) {
-    if (ws.isAlive === false) return ws.terminate();
- 
-    ws.isAlive = false;
-    ws.ping(noop);
-  });
-}, 30000);*/
-
-
-const interval = setTimeout(function ping() {
-
-  wss.clients.forEach(function each(ws) {
-    if (ws.isAlive === false) return ws.terminate();
- 
-    ws.isAlive = false;
-    ws.ping(noop);
-  });
-
-  timerId = setTimeout(ping, 10000);
-}, 10000);
-
-// Broadcast to all.
-/*wss.broadcast = function broadcast(data) {
-  wss.clients.forEach(function each(client) {
-    if (client.readyState === WebSocket.OPEN) {
-      client.send(data);
-    }
-  });
-};
- 
-wss.on('connection', function connection(ws) {
-  ws.on('message', function incoming(data) {
-    // Broadcast to everyone else.
-    wss.clients.forEach(function each(client) {
-      if (client !== ws && client.readyState === WebSocket.OPEN) {
-        client.send(data);
-      }
-    });
-  });
-});*/
+socket;
 
 module.exports = app;
+
+// start websocket: http -sid-> server save {sid:sid, key: key} 
+// browser <-key- server
+// browser WSS -key-> server auth complete {sid:sid, key: key} deleted after 60 sec.
+

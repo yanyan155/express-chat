@@ -9,7 +9,7 @@ router.get('/', checkAuth, function(req, res, next) {
 
   res.render('index', { 
     title: 'Chat',
-    description: 'welcome to personal chat (user123) !',
+    description: `welcome to personal chat, ${res.locals.user.name}!`,
     webSocket: true
   });
 });
