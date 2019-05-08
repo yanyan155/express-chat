@@ -9,6 +9,7 @@ const session = require('express-session');
 const config = require('./config/index');
 const MongoStore = require('connect-mongo')(session);
 const mongoose = require('./libs/mongoose');
+const socket = require('./socket');
 
 const indexRouter = require('./routes/index');
 const loginRouter = require('./routes/login');
@@ -16,7 +17,6 @@ const logoutRouter = require('./routes/logout');
 const chatRouter = require('./routes/chat');
 const usersRouter = require('./routes/users');
 const userRouter = require('./routes/user');
-const socket = require('./socket');
 
 let app = express();
 
@@ -83,8 +83,6 @@ app.use(function(err, req, res, next) {
     // rewatch/study screencast debug video
   }
 });
-
-socket;
 
 module.exports = app;
 

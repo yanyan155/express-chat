@@ -13,6 +13,8 @@ router.get('/', function(req, res, next) {
   });
 });
 
+// ПЕРЕНЕСТИ ЛОГИКУ В ЮЗЕРА
+
 router.post('/', function (req, res, next) {
   let bodyJson;
   for(key in req.body) {

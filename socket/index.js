@@ -1,17 +1,19 @@
-
 const WebSocket = require('ws');
 const config = require('../config');
 const cookieParser = require('cookie-parser');
 const sessionStore = require('../libs/sessionStore');
 const User = require('../models/user');
+const HttpError = require('../error');
 
 const wss = new WebSocket.Server({ 
   port: config.get('socket:port'),
   host: config.get('socket:host'),
 });
+let wSocket;
 
 wss.on('connection', async function connection(ws, request) {
 
+  wSocket = ws;
   let cookieSid = parseCookie(request.headers.cookie);
   let sid = cookieParser.signedCookie(cookieSid[config.get('session:key')], config.get('session:secret'));
 
@@ -21,12 +23,13 @@ wss.on('connection', async function connection(ws, request) {
     session = await loadSession(sid);
     user = await loadUser(session.userId);
   } catch (err) {
-    ws.destroy();
+    ws.terminate();
     return err;
   }
   
   request.socketSession = session;
   request.socketUser = user;
+  
 
   ws.isAlive = true;
   ws.on('pong', heartbeat);
@@ -40,6 +43,25 @@ wss.on('connection', async function connection(ws, request) {
   ws.on('close', function open() {
     broadCastSocket(wss, ws, request, 'is disconnected to chat!', true);
   });
+});
+
+wss.on('upgrade', async function upgrade(req, sid) {
+
+  for (const client of wss.clients) {
+    if (client === wSocket) {
+      let session;
+      let user;
+      try {
+        session = await loadSession(sid);
+        user = await loadUser(session.userId);
+      } catch (err) {
+        wSocket.terminate();
+        return err;
+      }
+    }
+  }
+  request.socketSession = session;
+  request.socketUser = user;
 });
 
 wss.interval = function() {
@@ -69,11 +91,11 @@ function loadSession(sid) {
   return new Promise(function(resolve, reject) {
 
     sessionStore.get(sid, (error, session) => {
-      if (error) {
+      if (error || !session) {
         reject(new HttpError(401, 'No session'));
       }else if(session) {
         resolve(session);
-      };
+      }
     })
   });
 }
