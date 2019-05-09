@@ -39,19 +39,12 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 const sessionStore = require('./libs/sessionStore');
 app.use(session({
-  /*genid: function(req) {
-    return genuuid() // use UUIDs for session IDs, uid-safe library
-  },*/
   secret: config.get('session:secret'),
   key: config.get('session:key'),
   resave: false,
   saveUninitialized: false,
   store: sessionStore
 }));
-/*app.use((req, res, next) => {
-  req.session.visit = req.session.visit + 1 || 1;
-  res.send(`visits ${req.session.visit}`);
-});*/
 app.use(require('./middleware/sendHttpError'));
 app.use(require('./middleware/variables'));
 
@@ -78,15 +71,7 @@ app.use(function(err, req, res, next) {
     res.locals.error = req.app.get('env') === 'development' ? err : {};
     res.status(err.status || 500);
     res.render('error');
-
-    // here need write error in log, if req.app.get('env') !== 'development'
-    // rewatch/study screencast debug video
   }
 });
 
 module.exports = app;
-
-// start websocket: http -sid-> server save {sid:sid, key: key} 
-// browser <-key- server
-// browser WSS -key-> server auth complete {sid:sid, key: key} deleted after 60 sec.
-

@@ -58,7 +58,6 @@ schema.statics.authorize = function (username, password, cb) {
   .catch(err => cb(err));
 }
 
-
 const User = mongoose.model('User', schema);
 
 module.exports = User;
